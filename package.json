@@ -1,12 +1,35 @@
 {
-  "name": "bun-sqlite-migrations",
-  "version": "1.0.2",
-  "main": "src/index.ts",
-  "module": "src/index.ts",
+  "name": "@zihaolam/bun-sqlite-migrations",
+  "version": "1.0.1",
+  "homepage": "https://patwoz.dev",
+  "license": "MIT",
+  "author": "Patrick Wozniak <hi@patwoz.de>",
+  "repository": {
+    "type": "git",
+    "url": "github:zihaolam/bun-sqlite-migrations"
+  },
   "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "check-format": "prettier --ignore-path .gitignore '**/*.ts' --check",
-    "check-types": "tsc --version && tsc --noEmit --skipLibCheck"
+    "check-types": "tsc --version && tsc --noEmit --skipLibCheck",
+    "build:js": "bun build ./src/index.ts --target=node --minify --sourcemap --outdir=./dist",
+    "build:types": "tsc --project tsconfig.build.json",
+    "build": "bun run build:js && bun run build:types",
+    "package": "bun run build",
+    "prepublishOnly": "bun run build"
   },
   "devDependencies": {
     "bun-types": "latest",
@@ -18,12 +41,5 @@
   "prettier": {
     "semi": false,
     "singleQuote": true
-  },
-  "license": "MIT",
-  "author": "Patrick Wozniak <hi@patwoz.de>",
-  "homepage": "https://patwoz.dev",
-  "repository": {
-    "type": "git",
-    "url": "github:patwoz/bun-sqlite-migrations"
   }
 }

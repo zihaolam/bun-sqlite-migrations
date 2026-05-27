@@ -1,36 +1,35 @@
-import { readFileSync, readdirSync } from 'fs'
-import type { Migration } from './migration'
+import { readFileSync, readdirSync } from "fs";
+import type { Migration } from "./migration";
 
 export const readMigrationFiles = (path: string): string[] => {
   const sqlFiles = readdirSync(path, { withFileTypes: true })
-    .filter((file) => file.isFile() && file.name.endsWith('.sql'))
+    .filter((file) => file.isFile() && file.name.endsWith(".sql"))
     .map((sqlFile) => `${path}/${sqlFile.name}`)
-    .sort()
+    .sort();
 
-  return sqlFiles
-}
+  return sqlFiles;
+};
 
 export const getMigrations = (path: string): Migration[] => {
-  const migrationFilesPaths = readMigrationFiles(path)
+  const migrationFilesPaths = readMigrationFiles(path);
 
-  const migrations: Migration[] = []
+  const migrations: Migration[] = [];
 
-  for (let i = 0; i < migrationFilesPaths.length; i++) {
-    const filePath = migrationFilesPaths[i]
-    const fileContent = readFileSync(filePath, { encoding: 'utf8' })
+  for (const [i, filePath] of migrationFilesPaths.entries()) {
+    const fileContent = readFileSync(filePath, { encoding: "utf8" });
 
-    const up = parseSqlContent(fileContent)
+    const up = parseSqlContent(fileContent);
 
     const migration: Migration = {
       up,
-      down: '',
+      down: "",
       version: i + 1,
-    }
-    migrations.push(migration)
+    };
+    migrations.push(migration);
   }
 
-  return migrations
-}
+  return migrations;
+};
 
 /**
  * A single .sql file can contain multiple sql statements
@@ -40,6 +39,6 @@ export const parseSqlContent = (content: string): string[] => {
   const parts = content
     .split(/\n\n/gm)
     .map((v) => v.trim())
-    .filter((v) => v.length > 0)
-  return parts
-}
+    .filter((v) => v.length > 0);
+  return parts;
+};

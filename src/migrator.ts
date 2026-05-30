@@ -39,6 +39,24 @@ export const parseSqlContent = (content: string): string[] => {
   const parts = content
     .split(/\n\n/gm)
     .map((v) => v.trim())
-    .filter((v) => v.length > 0);
+    .filter((v) => v.length > 0)
+    .filter((v) => !isCommentOnly(v));
   return parts;
+};
+
+/**
+ * Returns true when the chunk contains no executable SQL once SQL comments
+ * (both `--` line comments and `/* *\/` block comments) and whitespace are
+ * stripped. Used to drop standalone header comment blocks that would otherwise
+ * be handed to bun:sqlite's `.run()` and trigger "Query contained no valid SQL
+ * statement; likely empty query."
+ */
+const isCommentOnly = (chunk: string): boolean => {
+  const stripped = chunk
+    // Block comments — non-greedy, dot-all so newlines inside are consumed.
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    // Line comments — to end of line.
+    .replace(/--[^\n]*/g, "")
+    .trim();
+  return stripped.length === 0;
 };

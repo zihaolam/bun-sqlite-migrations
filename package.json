@@ -1,6 +1,6 @@
 {
   "name": "@zihaolam/bun-sqlite-migrations",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "homepage": "https://patwoz.dev",
   "license": "MIT",
   "author": "Patrick Wozniak <hi@patwoz.de>",
@@ -8,6 +8,9 @@
     "type": "git",
     "url": "github:zihaolam/bun-sqlite-migrations"
   },
+  "files": [
+    "dist"
+  ],
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -19,9 +22,6 @@
       "default": "./dist/index.js"
     }
   },
-  "files": [
-    "dist"
-  ],
   "scripts": {
     "check-format": "prettier --ignore-path .gitignore '**/*.ts' --check",
     "check-types": "tsc --version && tsc --noEmit --skipLibCheck",

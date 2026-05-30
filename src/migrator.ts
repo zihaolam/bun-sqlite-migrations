@@ -1,4 +1,5 @@
 import { readFileSync, readdirSync } from "fs";
+import { basename } from "path";
 import type { Migration } from "./migration";
 
 export const readMigrationFiles = (path: string): string[] => {
@@ -19,11 +20,13 @@ export const getMigrations = (path: string): Migration[] => {
     const fileContent = readFileSync(filePath, { encoding: "utf8" });
 
     const up = parseSqlContent(fileContent);
+    const name = basename(filePath);
 
     const migration: Migration = {
       up,
       down: "",
       version: i + 1,
+      name,
     };
     migrations.push(migration);
   }

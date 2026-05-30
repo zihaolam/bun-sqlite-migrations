@@ -1,9 +1,8 @@
 {
   "name": "@zihaolam/bun-sqlite-migrations",
-  "version": "1.0.2",
-  "homepage": "https://patwoz.dev",
+  "version": "1.0.3",
   "license": "MIT",
-  "author": "Patrick Wozniak <hi@patwoz.de>",
+  "author": "Lam Zi Hao <lamzihao98@gmail.com>",
   "repository": {
     "type": "git",
     "url": "github:zihaolam/bun-sqlite-migrations"

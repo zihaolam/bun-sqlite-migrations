@@ -144,6 +144,80 @@ test('Down-migration removes the row for the version that was rolled back', () =
   expect(readPragmaUserVersion(db)).toBe(0)
 })
 
+test('Custom tableName: only the custom table exists and is populated', () => {
+  const db = new Database(':memory:')
+  const migrations = [makeMigration(1), makeMigration(2), makeMigration(3)]
+
+  migrate(db, migrations, undefined, { tableName: 'schema_migrations' })
+
+  const customRows = db
+    .prepare('SELECT version FROM schema_migrations ORDER BY version ASC')
+    .all() as { version: number }[]
+  expect(customRows.map((r) => r.version)).toEqual([1, 2, 3])
+
+  // Default table must NOT have been created.
+  const defaultExists = db
+    .prepare(
+      "SELECT name FROM sqlite_master WHERE type='table' AND name = ?",
+    )
+    .get(MIGRATIONS_TABLE)
+  expect(defaultExists).toBeNull()
+})
+
+test('Default tableName still creates __migrations__ when no options passed', () => {
+  const db = new Database(':memory:')
+  const migrations = [makeMigration(1), makeMigration(2)]
+
+  migrate(db, migrations)
+
+  const defaultExists = db
+    .prepare(
+      "SELECT name FROM sqlite_master WHERE type='table' AND name = ?",
+    )
+    .get(MIGRATIONS_TABLE) as { name: string } | null
+  expect(defaultExists?.name).toBe(MIGRATIONS_TABLE)
+  expect(readAppliedVersions(db)).toEqual([1, 2])
+})
+
+test('Bootstrap honours custom tableName', () => {
+  const db = new Database(':memory:')
+  db.run('PRAGMA user_version = 3')
+
+  const migrations = [makeMigration(1), makeMigration(2), makeMigration(3)]
+  migrate(db, migrations, undefined, { tableName: 'schema_migrations' })
+
+  const customRows = db
+    .prepare('SELECT version FROM schema_migrations ORDER BY version ASC')
+    .all() as { version: number }[]
+  expect(customRows.map((r) => r.version)).toEqual([1, 2, 3])
+  expect(readPragmaUserVersion(db)).toBe(0)
+
+  // Default table must not exist.
+  const defaultExists = db
+    .prepare(
+      "SELECT name FROM sqlite_master WHERE type='table' AND name = ?",
+    )
+    .get(MIGRATIONS_TABLE)
+  expect(defaultExists).toBeNull()
+})
+
+test('Invalid tableName throws and does not mutate the database', () => {
+  const db = new Database(':memory:')
+  const migrations = [makeMigration(1)]
+
+  expect(() =>
+    migrate(db, migrations, undefined, { tableName: 'drop; drop' }),
+  ).toThrow(/Invalid migrations table name/)
+
+  // No bookkeeping table and no migration-created table should exist.
+  const tables = db
+    .prepare("SELECT name FROM sqlite_master WHERE type='table'")
+    .all() as { name: string }[]
+  const names = tables.map((t) => t.name)
+  expect(names).not.toContain(MIGRATIONS_TABLE)
+  expect(names).not.toContain('t_1')
+})
+
 test('Should drop a standalone block-comment chunk', () => {
   const sqlFileContent = `/*
  * Header describing the migration.
